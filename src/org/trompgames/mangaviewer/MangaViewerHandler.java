@@ -13,6 +13,9 @@ import java.util.zip.ZipFile;
 
 import javax.imageio.ImageIO;
 
+import org.trompgames.onlinemanga.MangaHereManga;
+import org.trompgames.onlinemanga.OnlineManga;
+
 public class MangaViewerHandler {
 
 	private MangaViewerFrame frame;
@@ -21,11 +24,12 @@ public class MangaViewerHandler {
 	private int screenWidth;
 	private int screenHeight;
 	
+	private MangaHereManga onlineManga;
+	
 	private File mangaFolder;
 	private File currentMangaFile;
 	
-	private ZipFile zipFile;
-	
+	private ZipFile zipFile;	
 	
 	private Manga currentManga;
 	private int currentChapter = 0;
@@ -64,12 +68,19 @@ public class MangaViewerHandler {
 		imageLoader.start();
 		
 		this.frame = new MangaViewerFrame(this, screenWidth, screenHeight);
-		this.panel = frame.getMangaViewerPanel();
+		this.panel = frame.getMangaViewerPanel();		
 		
 		
-		this.loadManga(currentMangaFile);
+		
+		//this.loadManga(currentMangaFile);
+		
+		onlineManga = new MangaHereManga("http://www.mangahere.co/manga/girl_the_wild_s/");
+		this.currentManga = onlineManga.getManga();
+		
 		
 		properties = new MangaProperties(this, currentManga);
+		
+		
 		
 		this.currentChapter = properties.getChapter();
 		this.currentPage = properties.getPage();
@@ -119,19 +130,12 @@ public class MangaViewerHandler {
 					}else{
 						handler.loadPrevious();
 					}
-					//System.out.println("???");
-					//handler.properties.saveProperties();
-					
 					handler.updateImages = false;
 					updating = false;
 				}			
 				lastTime = System.currentTimeMillis();
 			}
-		}		
-		
-		
-		
-		
+		}	
 	}
 	
 	public void reload(){
@@ -148,7 +152,7 @@ public class MangaViewerHandler {
 			previousImage = getImage(currentManga, currentChapter, currentPage - 1);
 			//System.out.println("Loaded previous");
 		}else if(currentChapter > 0){
-			previousImage = getImage(currentManga, currentChapter - 1, currentManga.getChapters().get(currentChapter - 1).getPages() - 1);
+			previousImage = getImage(currentManga, currentChapter - 1, currentManga.getPages(currentChapter - 1) - 1);
 			//System.out.println("Loaded previous in previous chapter");			
 		}
 	}
@@ -159,11 +163,11 @@ public class MangaViewerHandler {
 	}
 	
 	private void loadNext(){
-		if(currentPage < currentManga.getChapters().get(currentChapter).getPages() - 1){
+		if(currentPage < currentManga.getPages(currentChapter) - 1){
 			nextImage = getImage(currentManga, currentChapter, currentPage + 1);
 			//System.out.println("Loaded next");
-		}else if(currentChapter < currentManga.getChapters().size()){
-			if(currentChapter + 1 >= currentManga.getChapters().size()){
+		}else if(currentChapter < currentManga.getTotalChapters()){
+			if(currentChapter + 1 >= currentManga.getTotalChapters()){
 				nextImage = null;
 				return;
 			}
@@ -174,54 +178,70 @@ public class MangaViewerHandler {
 	
 	
 	private void loadImages(){
-		loadPrevious();
 		loadCurrent();
+		loadPrevious();
 		loadNext();		
 	}
 	
 	private BufferedImage getImage(Manga manga, int chapter, int page){		
 		
-		String imageName = manga.getChapters().get(chapter).getImageFileNames().get(page);	
-		
-		BufferedImage image = null;		
-		try {
+		if(manga instanceof FileManga){
 			
-			if(currentMangaFile.isDirectory()){				
-				String path = currentMangaFile.toString() + "\\" + currentManga.getChapters().get(chapter).getName() + "\\" + currentManga.getChapters().get(chapter).getImageFileNames().get(page);
-				image = ImageIO.read(new File(path));
-			}else{
-				InputStream stream = zipFile.getInputStream(zipFile.getEntry(imageName));			
-				image = ImageIO.read(stream);
+			
+			FileMangaChapter mangaChapter = ((FileManga) manga).getChapters().get(chapter);
+			
+			String imageName = mangaChapter.getImageFileNames().get(page);	
+			
+			BufferedImage image = null;		
+			try {
+				
+				if(currentMangaFile.isDirectory()){				
+					String path = currentMangaFile.toString() + "\\" + mangaChapter.getName() + "\\" + mangaChapter.getImageFileNames().get(page);
+					image = ImageIO.read(new File(path));
+				}else{
+					InputStream stream = zipFile.getInputStream(zipFile.getEntry(imageName));			
+					image = ImageIO.read(stream);
+				}
+				
+				
+			} catch (IOException e) {
+				e.printStackTrace();
 			}
+			return image;
+		}else if(manga instanceof OnlineManga){
 			
 			
-		} catch (IOException e) {
-			e.printStackTrace();
+			BufferedImage image = onlineManga.getImage(chapter, page);
+			
+			return image;
 		}
-		return image;
+		return null;
 	}
 	
 	public void nextPage(){
 		if(updateImages) return;
-		if(currentPage + 1 >= currentManga.getChapters().get(currentChapter).getPages() && currentManga.getChapters().size() <= currentChapter + 1) return;
+		if(currentPage + 1 >= currentManga.getPages(currentChapter) && currentManga.getTotalChapters() <= currentChapter + 1) return;
 		currentPage++;
-		
 		currentScroll = 0;
 		
-		if(currentPage >= currentManga.getChapters().get(currentChapter).getPages()){
+		
+		//This
+		if(currentPage >= currentManga.getPages(currentChapter)){
 			currentPage = 0;
 			currentChapter += 1;
 		}
-		
 		previousImage = currentImage;
 		currentImage = nextImage;
 		yOffset = 0;
-		getMangaViewerFrame().updateTitle();
 		
+		//This
+		getMangaViewerFrame().updateTitle();
 		
 		properties.saveProperties();
 		
+		
 		this.getMangaViewerFrame().repaint();
+		
 		
 		wasUpdateNext = true;
 		updateImages = true;
@@ -236,7 +256,7 @@ public class MangaViewerHandler {
 		
 		if(currentPage < 0){
 			currentChapter -= 1;
-			currentPage = currentManga.getChapters().get(currentChapter).getPages() - 1;			
+			currentPage = currentManga.getPages(currentChapter) - 1;			
 		}
 		
 		nextImage = currentImage;
@@ -258,7 +278,7 @@ public class MangaViewerHandler {
 		
 		if(file.isDirectory()){
 			
-			ArrayList<MangaChapter> chapters = new ArrayList<MangaChapter>();
+			ArrayList<FileMangaChapter> chapters = new ArrayList<FileMangaChapter>();
 			ArrayList<String> imageFileNames = new ArrayList<String>();
 
 			
@@ -271,10 +291,10 @@ public class MangaViewerHandler {
 					imageFileNames.add(img.getName());
 				}
 				
-				chapters.add(new MangaChapter(chapterName, imageFileNames));				
+				chapters.add(new FileMangaChapter(chapterName, imageFileNames));				
 			}
 			
-			currentManga = new Manga(file.getName(), chapters);		
+			currentManga = new FileManga(file.getName(), chapters);		
 
 			
 		}else{
@@ -283,7 +303,7 @@ public class MangaViewerHandler {
 				zipFile = new ZipFile(file);
 
 				Enumeration<? extends ZipEntry> entries = zipFile.entries();			
-				ArrayList<MangaChapter> chapters = new ArrayList<MangaChapter>();
+				ArrayList<FileMangaChapter> chapters = new ArrayList<FileMangaChapter>();
 				
 				String chapterName = null;
 				ArrayList<String> imageFileNames = new ArrayList<String>();
@@ -295,7 +315,7 @@ public class MangaViewerHandler {
 						if(chapterName == null){
 							chapterName = entry.getName();
 						}else{
-							chapters.add(new MangaChapter(chapterName, imageFileNames));
+							chapters.add(new FileMangaChapter(chapterName, imageFileNames));
 							
 							chapterName = entry.getName();
 							imageFileNames = new ArrayList<String>();					
@@ -304,8 +324,8 @@ public class MangaViewerHandler {
 						imageFileNames.add(entry.getName());					
 					}			
 				}			
-				chapters.add(new MangaChapter(chapterName, imageFileNames));				
-				currentManga = new Manga(file.getName().substring(0, file.getName().lastIndexOf('.')), chapters);		
+				chapters.add(new FileMangaChapter(chapterName, imageFileNames));				
+				currentManga = new FileManga(file.getName().substring(0, file.getName().lastIndexOf('.')), chapters);		
 				
 			} catch (IOException e) {
 				e.printStackTrace();

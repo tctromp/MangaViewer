@@ -7,14 +7,12 @@ public class MangaChapter {
 	private String name;
 	private int pages;	
 	
-	private ArrayList<String> imageFileNames = new ArrayList<String>();
 	
-	public MangaChapter(String name, ArrayList<String> imageFileNames){
+	public MangaChapter(String name, int pages){
 		this.name = name;
-		this.imageFileNames = imageFileNames;
-		this.pages = imageFileNames.size();
+		this.pages = pages;
 	}
-
+	
 	public String getName() {
 		return name;
 	}
@@ -23,9 +21,7 @@ public class MangaChapter {
 		return pages;
 	}
 
-	public ArrayList<String> getImageFileNames() {
-		return imageFileNames;
-	}
+	
 	
 	
 }

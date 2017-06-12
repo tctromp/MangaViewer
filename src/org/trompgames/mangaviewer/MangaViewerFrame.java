@@ -12,6 +12,8 @@ import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.filechooser.FileFilter;
 
+import org.trompgames.onlinemanga.OnlineManga;
+
 public class MangaViewerFrame extends JFrame{
 
 	private MangaViewerHandler handler;
@@ -76,27 +78,38 @@ public class MangaViewerFrame extends JFrame{
 	}
 	
 	public void updateTitle(){
-		Manga manga = handler.getCurrentManga();
-		MangaChapter chapter = manga.getChapters().get(handler.getCurrentChapter());
+		Manga m = handler.getCurrentManga();
 		
-		int cumPages = manga.getCumulativePages(handler.getCurrentPage(), handler.getCurrentChapter());
-		
-		double percent = 100.0 * cumPages/manga.getTotalPages();
-		String s = "" + percent;
-		
-		if(s.indexOf('.') == 1) s = "0" + s;
-		
-		if(s.length() > 5){
-			s = s.substring(0, 5);
-		}else{
-			for(int i = 0; i < 5 - s.length(); i++){
-				s += "0";
+		if(m instanceof FileManga){
+			FileManga manga = (FileManga) m;
+			MangaChapter chapter = manga.getChapters().get(handler.getCurrentChapter());
+			
+			int cumPages = manga.getCumulativePages(handler.getCurrentPage(), handler.getCurrentChapter());
+			
+			double percent = 100.0 * cumPages/manga.getTotalPages();
+			String s = "" + percent;
+			
+			if(s.indexOf('.') == 1) s = "0" + s;
+			
+			if(s.length() > 5){
+				s = s.substring(0, 5);
+			}else{
+				for(int i = 0; i < 5 - s.length(); i++){
+					s += "0";
+				}
 			}
+			
+			s += "%";
+			
+			this.setTitle("MangaViewer - " + chapter.getName() + " - Page: (" + (handler.getCurrentPage() + 1) + "/" + chapter.getPages() + ") - " + cumPages + "/" + manga.getTotalPages() + " - " + s);
+		}else{
+			
+			OnlineManga manga = (OnlineManga) m;
+			
+			this.setTitle("MangaViewer - " +  " - Page: (" + (handler.getCurrentPage() + 1) + "/" + manga.getPages(handler.getCurrentChapter()) + ")");
 		}
+
 		
-		s += "%";
-		
-		this.setTitle("MangaViewer - " + chapter.getName() + " - Page: (" + (handler.getCurrentPage() + 1) + "/" + chapter.getPages() + ") - " + cumPages + "/" + manga.getTotalPages() + " - " + s);
 	}
 	
 	public void addKeyListener(){
