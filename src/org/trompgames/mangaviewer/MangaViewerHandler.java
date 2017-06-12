@@ -126,9 +126,17 @@ public class MangaViewerHandler {
 				if(handler.updateImages && !updating){		
 					updating = true;
 					if(handler.wasUpdateNext){
-						handler.loadNext();
+						new Thread(() -> {
+							handler.loadNext();	
+						}).start();				
+						
 					}else{
-						handler.loadPrevious();
+						
+						new Thread(() -> {
+							handler.loadPrevious();
+						}).start();
+						
+						
 					}
 					handler.updateImages = false;
 					updating = false;
@@ -147,7 +155,11 @@ public class MangaViewerHandler {
 		this.currentMangaFile = file;
 	}
 	
+	private boolean loading = false;
+	
 	private void loadPrevious(){
+		if(loading) return;
+		loading = true;
 		if(currentPage > 0){
 			previousImage = getImage(currentManga, currentChapter, currentPage - 1);
 			//System.out.println("Loaded previous");
@@ -155,14 +167,22 @@ public class MangaViewerHandler {
 			previousImage = getImage(currentManga, currentChapter - 1, currentManga.getPages(currentChapter - 1) - 1);
 			//System.out.println("Loaded previous in previous chapter");			
 		}
+		loading = false;
 	}
 	
 	private void loadCurrent(){
+		if(loading) return;
+		loading = true;
+
 		currentImage = getImage(currentManga, currentChapter, currentPage);
 		//System.out.println("Loaded current");
+		loading = false;
 	}
 	
 	private void loadNext(){
+		if(loading) return;
+		loading = true;
+
 		if(currentPage < currentManga.getPages(currentChapter) - 1){
 			nextImage = getImage(currentManga, currentChapter, currentPage + 1);
 			//System.out.println("Loaded next");
@@ -174,6 +194,8 @@ public class MangaViewerHandler {
 			nextImage = getImage(currentManga, currentChapter + 1, 0);
 			//System.out.println("Loaded next in next chapter");
 		}
+		loading = false;
+
 	}
 	
 	
@@ -219,7 +241,7 @@ public class MangaViewerHandler {
 	}
 	
 	public void nextPage(){
-		if(updateImages) return;
+		if(updateImages || loading) return;
 		if(currentPage + 1 >= currentManga.getPages(currentChapter) && currentManga.getTotalChapters() <= currentChapter + 1) return;
 		currentPage++;
 		currentScroll = 0;
@@ -248,7 +270,7 @@ public class MangaViewerHandler {
 	}
 	
 	public void previousPage(){
-		if(updateImages) return;
+		if(updateImages || loading) return;
 		if(currentPage <= 0 && currentChapter == 0) return;
 		currentPage--;
 		
