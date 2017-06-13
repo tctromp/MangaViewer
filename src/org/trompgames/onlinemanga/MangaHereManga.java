@@ -9,7 +9,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.StringTokenizer;
 import java.util.zip.GZIPInputStream;
-import java.util.zip.ZipException;
 
 import javax.imageio.ImageIO;
 
@@ -83,12 +82,12 @@ public class MangaHereManga {
 		
 		
 		loadChapters();
-		System.out.println("Chapters: ");
+		//System.out.println("Chapters: ");
 		
 		for(int i = 0; i < chapterURLS.size(); i++){
-			String url = chapterURLS.get(i);
-			String detail = chapterDetails.get(i);
-			System.out.println(url + " - " + detail);			
+			//String url = chapterURLS.get(i);
+			//String detail = chapterDetails.get(i);
+			//System.out.println(url + " - " + detail);			
 		}		
 		
 		//delay(5000);

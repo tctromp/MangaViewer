@@ -1,5 +1,7 @@
 package org.trompgames.mangaviewer;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
@@ -10,6 +12,10 @@ import java.io.File;
 
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileFilter;
 
 import org.trompgames.onlinemanga.OnlineManga;
@@ -47,21 +53,62 @@ public class MangaViewerFrame extends JFrame{
 			}
 			
 		});
+		fc.addActionListener(new ActionListener(){
+
+			@Override
+			public void actionPerformed(ActionEvent event) {				
+				handler.loadManga(fc.getSelectedFile());
+				handler.reload();
+			}			
+		});
 		
-		
-		fc.showOpenDialog(this);
-		
-		File file = fc.getSelectedFile();
-		
-		if(file == null){
-			System.exit(0);
-		}
-		
+		//fc.showOpenDialog(this);
+				
 		
 		
 		//Add panel
 		panel = new MangaViewerPanel(handler);
 		this.add(panel);
+		
+		
+		
+		
+		
+		JMenuBar menuBar = new JMenuBar();
+		JMenu menu = new JMenu("File");
+		
+		JMenuItem openFileButton = new JMenuItem("Open");
+		openFileButton.addActionListener(new ActionListener(){
+
+			@Override
+			public void actionPerformed(ActionEvent event) {
+				fc.showOpenDialog(handler.getMangaViewerFrame());				
+			}
+			
+		});
+		menu.add(openFileButton);
+		
+		JMenuItem openURLButton = new JMenuItem("Load MangaHere Manga");
+		openURLButton.addActionListener(new ActionListener(){
+
+			@Override
+			public void actionPerformed(ActionEvent event) {
+				
+				
+				String url = JOptionPane.showInputDialog(handler.getMangaViewerFrame(), "MangaHere URL: ", null);
+				if(url == null) return;
+				
+				handler.setOnlineManga(url);
+			}			
+			
+		});
+		
+		menu.add(openURLButton);
+		
+		menuBar.add(menu);
+		this.setJMenuBar(menuBar);
+
+		
 		
 		
 		//Add Listeners
@@ -73,12 +120,17 @@ public class MangaViewerFrame extends JFrame{
 		this.setDefaultCloseOperation(EXIT_ON_CLOSE);
 		this.setVisible(true);
 		
-		handler.setCurrentMangaFile(file);
+		
 		
 	}
 	
 	public void updateTitle(){
 		Manga m = handler.getCurrentManga();
+		
+		if(m == null){
+			this.setTitle("MangaViewer");
+			return;
+		}
 		
 		if(m instanceof FileManga){
 			FileManga manga = (FileManga) m;

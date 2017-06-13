@@ -71,21 +71,16 @@ public class MangaViewerHandler {
 		this.panel = frame.getMangaViewerPanel();		
 		
 		
-		
-		//this.loadManga(currentMangaFile);
-		
-		onlineManga = new MangaHereManga("http://www.mangahere.co/manga/girl_the_wild_s/");
-		this.currentManga = onlineManga.getManga();
-		
-		
-		properties = new MangaProperties(this, currentManga);
+			
+		//onlineManga = new MangaHereManga("http://www.mangahere.co/manga/berserk/");
+		//this.currentManga = onlineManga.getManga();
 		
 		
 		
-		this.currentChapter = properties.getChapter();
-		this.currentPage = properties.getPage();
 		
-		this.reload();
+		
+		
+		
 		
 		this.getMangaViewerFrame().updateTitle();
 		
@@ -93,6 +88,20 @@ public class MangaViewerHandler {
 		//System.out.println("Cumulative Pages: " + currentManga.getCumulativePages(currentPage, currentChapter));
 	}
 
+	public void setOnlineManga(String url){
+		onlineManga = new MangaHereManga(url);
+		
+		this.currentManga = onlineManga.getManga();
+		properties = new MangaProperties(this, currentManga);
+
+		this.currentChapter = properties.getChapter();
+		this.currentPage = properties.getPage();
+		
+		if(this.getMangaViewerFrame() != null)
+			this.getMangaViewerFrame().updateTitle();
+		reload();
+	}
+	
 	public static class MangaImageLoaderThread extends Thread{
 		
 		private MangaViewerHandler handler;
@@ -148,12 +157,10 @@ public class MangaViewerHandler {
 	
 	public void reload(){
 		loadImages();
-		this.getMangaViewerFrame().repaint();
+		if(this.getMangaViewerFrame() != null)
+			this.getMangaViewerFrame().repaint();
 	}
 	
-	public void setCurrentMangaFile(File file){
-		this.currentMangaFile = file;
-	}
 	
 	private boolean loading = false;
 	
@@ -241,7 +248,7 @@ public class MangaViewerHandler {
 	}
 	
 	public void nextPage(){
-		if(updateImages || loading) return;
+		if(updateImages || loading || currentManga == null) return;
 		if(currentPage + 1 >= currentManga.getPages(currentChapter) && currentManga.getTotalChapters() <= currentChapter + 1) return;
 		currentPage++;
 		currentScroll = 0;
@@ -270,7 +277,7 @@ public class MangaViewerHandler {
 	}
 	
 	public void previousPage(){
-		if(updateImages || loading) return;
+		if(updateImages || loading || currentManga == null) return;
 		if(currentPage <= 0 && currentChapter == 0) return;
 		currentPage--;
 		
@@ -298,6 +305,8 @@ public class MangaViewerHandler {
 	
 	public void loadManga(File file){
 		
+		this.currentMangaFile = file;
+
 		if(file.isDirectory()){
 			
 			ArrayList<FileMangaChapter> chapters = new ArrayList<FileMangaChapter>();
@@ -356,7 +365,13 @@ public class MangaViewerHandler {
 		}
 		
 		
+		properties = new MangaProperties(this, currentManga);
+
+		this.currentChapter = properties.getChapter();
+		this.currentPage = properties.getPage();
 		
+		if(this.getMangaViewerFrame() != null)
+			this.getMangaViewerFrame().updateTitle();
 		loadImages();
 	}
 	
