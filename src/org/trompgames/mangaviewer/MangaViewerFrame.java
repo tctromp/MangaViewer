@@ -1,5 +1,7 @@
 package org.trompgames.mangaviewer;
 
+import java.awt.Font;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -10,14 +12,24 @@ import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.io.File;
 
+import javax.swing.BorderFactory;
+import javax.swing.DefaultListModel;
+import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
+import javax.swing.JTextArea;
+import javax.swing.ListSelectionModel;
 import javax.swing.filechooser.FileFilter;
 
+import org.trompgames.onlinemanga.MangaHereManga;
 import org.trompgames.onlinemanga.OnlineManga;
 
 public class MangaViewerFrame extends JFrame{
@@ -33,6 +45,8 @@ public class MangaViewerFrame extends JFrame{
 		this.setExtendedState(JFrame.MAXIMIZED_BOTH);
 
 		this.setLocation(0, 0);
+		
+		
 		
 		JFileChooser fc = new JFileChooser(handler.getMangaFolder());
 
@@ -72,10 +86,16 @@ public class MangaViewerFrame extends JFrame{
 		
 		
 		
+		//Add Listeners
+		addMouseWheelListener();
+		addMouseListener();
+		addKeyListener();
+		
+		
 		
 		
 		JMenuBar menuBar = new JMenuBar();
-		JMenu menu = new JMenu("File");
+		JMenu menu = new JMenu("Manga");
 		
 		JMenuItem openFileButton = new JMenuItem("Open");
 		openFileButton.addActionListener(new ActionListener(){
@@ -94,11 +114,119 @@ public class MangaViewerFrame extends JFrame{
 			@Override
 			public void actionPerformed(ActionEvent event) {
 				
+				//String url = JOptionPane.showInputDialog(handler.getMangaViewerFrame(), "MangaHere URL: ", null);
+				//if(url == null) return;
 				
+				String url = "http://www.mangahere.co/manga/uq_holder/";
+				
+				MangaHereManga manga = new MangaHereManga(url);
+				
+				//TODO add checks for invalid urls
+				
+				handler.getMangaViewerFrame().remove(handler.getMangaViewerPanel());
+				
+				JPanel leftPanel = new JPanel();
+				leftPanel.setLayout(new GridLayout(2, 0));
+				
+				JPanel topPanel = new JPanel();
+				JPanel botPanel = new JPanel();
+				JPanel topLeftPanel = new JPanel();
+				JPanel topRightPanel = new JPanel();
+				
+				
+				
+				botPanel.setBorder(BorderFactory.createTitledBorder("Chapters: "));
+				botPanel.setLayout(new GridLayout(0, 1));
+				
+				DefaultListModel<String> model = new DefaultListModel<String>();
+				
+				for(String s : manga.getChapterURLS()){
+					model.addElement(s);
+				}
+				
+				JList<String> list = new JList<String>(model);
+				list.setSelectionMode(ListSelectionModel.SINGLE_INTERVAL_SELECTION);
+				//list.setLayoutOrientation(JList.HORIZONTAL_WRAP);
+				//list.setVisibleRowCount(-1);
+				list.setFont(new Font(list.getFont().getName(), 0, 20));
+				JScrollPane listScroller = new JScrollPane(list);
+				botPanel.add(listScroller);
+				
+				leftPanel.add(topPanel);
+				leftPanel.add(botPanel);
+				
+				
+				topPanel.setLayout(new GridLayout(0, 2));
+				
+				topLeftPanel.setBorder(BorderFactory.createTitledBorder("Info: "));
+				topRightPanel.setBorder(BorderFactory.createTitledBorder("Cover: "));
+				
+				
+				topLeftPanel.setLayout(new GridLayout(0, 1));
+				
+				String details = "";
+				details += "Title: " + manga.getTitle() + "\n";
+				details += "Rating: " + manga.getRating() + "\n\n";
+				details += "Genres: ";
+				
+				for(int i = 0; i < manga.getGenres().size() - 1; i++){
+					MangaCategory mc = manga.getGenres().get(i);
+					details += mc.toString() + ", ";
+				}
+				details += manga.getGenres().get(manga.getGenres().size() - 1);
+				
+				details +=  "\n\n";
+				
+				details += "Author: " + manga.getAuthor() + "\n";
+				details += "Artist: " + manga.getArtist() + "\n\n";
+				details += "Status: " + manga.getStatus() + "\n";
+				details += "Rank: " + manga.getRank() + "\n";
+				
+				
+				JTextArea detailField = new JTextArea();
+				detailField.setHighlighter(null);
+				detailField.setEditable(false);
+				
+				detailField.setLineWrap(true);
+				detailField.setWrapStyleWord(true);
+				detailField.setText(details);
+				
+				detailField.setFont(new Font(detailField.getFont().getFontName(), 0, 18));
+				detailField.setBackground(null);
+				
+				topLeftPanel.add(detailField);
+				
+				topRightPanel.setLayout(new GridLayout(0, 1));
+				
+				topPanel.add(topLeftPanel);
+				topPanel.add(topRightPanel);
+				
+
+
+				topRightPanel.add(new JLabel(new ImageIcon(manga.getCover())));				
+				
+				
+				//new ImageIcon(manga.getCover().getScaledInstance(topRightPanel.getWidth(), topRightPanel.getHeight(), Image.SCALE_SMOOTH))
+				JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftPanel, handler.getMangaViewerPanel());
+				splitPane.setResizeWeight(0.4);
+				splitPane.setEnabled(false);
+
+				
+				
+				handler.getMangaViewerFrame().add(splitPane);
+				handler.getMangaViewerFrame().revalidate();
+				
+				
+				handler.getMangaViewerFrame().repaint();
+				//handler.getMangaViewerFrame().repaint();
+				//splitPane.repaint();
+				
+				/*
 				String url = JOptionPane.showInputDialog(handler.getMangaViewerFrame(), "MangaHere URL: ", null);
 				if(url == null) return;
 				
 				handler.setOnlineManga(url);
+				*/
 			}			
 			
 		});
@@ -111,10 +239,7 @@ public class MangaViewerFrame extends JFrame{
 		
 		
 		
-		//Add Listeners
-		addMouseWheelListener();
-		addMouseListener();
-		addKeyListener();
+
 		
 		//Set close operation and show frame
 		this.setDefaultCloseOperation(EXIT_ON_CLOSE);
@@ -165,7 +290,7 @@ public class MangaViewerFrame extends JFrame{
 	}
 	
 	public void addKeyListener(){
-		this.addKeyListener(new KeyListener(){
+		panel.addKeyListener(new KeyListener(){
 
 			@Override
 			public void keyTyped(KeyEvent e) {
@@ -183,6 +308,7 @@ public class MangaViewerFrame extends JFrame{
 				 * Right: 39
 				 * 
 				 */				
+				
 				switch(event.getKeyCode()){				
 					case 38:
 						//handler.setYOffset(handler.getYOffset() - 75);	
@@ -222,7 +348,7 @@ public class MangaViewerFrame extends JFrame{
 	
 	public void addMouseListener(){
 		
-		this.addMouseListener(new MouseListener(){
+		panel.addMouseListener(new MouseListener(){
 
 			//1 = left 
 			//2 = middle
@@ -273,7 +399,7 @@ public class MangaViewerFrame extends JFrame{
 	}
 	
 	public void addMouseWheelListener(){
-		this.addMouseWheelListener(new MouseWheelListener(){
+		panel.addMouseWheelListener(new MouseWheelListener(){
 			@Override
 			public void mouseWheelMoved(MouseWheelEvent event) {
 				int rot = event.getWheelRotation();

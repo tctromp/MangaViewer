@@ -102,6 +102,20 @@ public class MangaViewerHandler {
 		reload();
 	}
 	
+	public void setOnlineManga(MangaHereManga mangaHereManga){
+		onlineManga = mangaHereManga;
+		
+		this.currentManga = onlineManga.getManga();
+		properties = new MangaProperties(this, currentManga);
+
+		this.currentChapter = properties.getChapter();
+		this.currentPage = properties.getPage();
+		
+		if(this.getMangaViewerFrame() != null)
+			this.getMangaViewerFrame().updateTitle();
+		reload();
+	}
+	
 	public static class MangaImageLoaderThread extends Thread{
 		
 		private MangaViewerHandler handler;
