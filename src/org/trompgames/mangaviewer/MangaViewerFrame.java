@@ -22,6 +22,7 @@ import javax.swing.JList;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
@@ -114,10 +115,10 @@ public class MangaViewerFrame extends JFrame{
 			@Override
 			public void actionPerformed(ActionEvent event) {
 				
-				//String url = JOptionPane.showInputDialog(handler.getMangaViewerFrame(), "MangaHere URL: ", null);
-				//if(url == null) return;
+				String url = JOptionPane.showInputDialog(handler.getMangaViewerFrame(), "MangaHere URL: ", null);
+				if(url == null) return;
 				
-				String url = "http://www.mangahere.co/manga/uq_holder/";
+				//String url = "http://www.mangahere.co/manga/uq_holder/";
 				
 				MangaHereManga manga = new MangaHereManga(url);
 				
