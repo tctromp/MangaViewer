@@ -14,6 +14,7 @@ import java.util.zip.ZipFile;
 import javax.imageio.ImageIO;
 
 import org.trompgames.onlinemanga.MangaHereManga;
+import org.trompgames.onlinemanga.MangaImage;
 import org.trompgames.onlinemanga.OnlineManga;
 
 public class MangaViewerHandler {
@@ -46,7 +47,6 @@ public class MangaViewerHandler {
 	private BufferedImage currentImage;
 	private BufferedImage nextImage;
 	
-	private MangaImageLoaderThread imageLoader;
 	
 	private boolean updateImages = false;
 	private boolean wasUpdateNext = true;
@@ -63,9 +63,11 @@ public class MangaViewerHandler {
 		
 		mangaFolder = new File("F:/Users/Thomas/Media/Manga");		
 		
-		imageLoader = new MangaImageLoaderThread(this);
-		
+		MangaImageLoaderThread imageLoader = new MangaImageLoaderThread(this);		
 		imageLoader.start();
+		
+		MangaFrameUpdaterThread frameUpdater = new MangaFrameUpdaterThread(this);		
+		frameUpdater.start();
 		
 		this.frame = new MangaViewerFrame(this, screenWidth, screenHeight);
 		this.panel = frame.getMangaViewerPanel();		
@@ -97,23 +99,94 @@ public class MangaViewerHandler {
 		this.currentChapter = properties.getChapter();
 		this.currentPage = properties.getPage();
 		
+		this.currentScroll = 0;
+
 		if(this.getMangaViewerFrame() != null)
 			this.getMangaViewerFrame().updateTitle();
 		reload();
 	}
 	
 	public void setOnlineManga(MangaHereManga mangaHereManga){
+		properties = new MangaProperties(this, mangaHereManga.getManga());
+		setOnlineManga(mangaHereManga, properties.getChapter(), properties.getPage());
+	}
+	
+	public void setOnlineManga(MangaHereManga mangaHereManga, int chapter){
+		properties = new MangaProperties(this, mangaHereManga.getManga());
+		int page = properties.getPage();
+		if(properties.getChapter() != chapter) page = 0;
+		setOnlineManga(mangaHereManga, chapter, page);
+	}
+	
+	public void setOnlineManga(MangaHereManga mangaHereManga, int chapter, int page){
 		onlineManga = mangaHereManga;
 		
 		this.currentManga = onlineManga.getManga();
-		properties = new MangaProperties(this, currentManga);
 
-		this.currentChapter = properties.getChapter();
-		this.currentPage = properties.getPage();
+		this.currentChapter = chapter;
+		this.currentPage = page;
+		
+		this.currentScroll = 0;
 		
 		if(this.getMangaViewerFrame() != null)
 			this.getMangaViewerFrame().updateTitle();
 		reload();
+		
+	}
+	
+	public static class MangaFrameUpdaterThread extends Thread{
+		
+		private MangaViewerHandler handler;
+		
+		public MangaFrameUpdaterThread(MangaViewerHandler handler){
+			this.handler = handler;
+		}	
+		
+		@Override
+		public void run(){
+			long lastTime = System.currentTimeMillis();		
+			
+			boolean updating = false;
+			while(true){				
+				if(!(System.currentTimeMillis() > lastTime + 17))continue;			
+					if(handler.getMangaViewerFrame() != null && handler.currentScroll != 0){
+						
+						handler.yOffset = handler.getYOffset() + handler.currentScroll * SCROLLMULTIPLIER;
+	
+						
+						if(handler.currentScroll > 0){
+							//down
+							handler.currentScroll -= 1;
+						}else{
+							//up
+							handler.currentScroll += 1;
+						}
+						
+						handler.getMangaViewerFrame().repaint();
+					}
+					if(handler.updateImages && !updating){		
+						updating = true;
+						if(handler.wasUpdateNext){
+							new Thread(() -> {
+								handler.loadNext();	
+							}).start();				
+							
+						}else{
+							
+							new Thread(() -> {
+								handler.loadPrevious();
+							}).start();
+							
+							
+						}
+						handler.updateImages = false;
+						updating = false;
+					}			
+					lastTime = System.currentTimeMillis();
+				
+			}
+		}	
+		
 	}
 	
 	public static class MangaImageLoaderThread extends Thread{
@@ -127,47 +200,85 @@ public class MangaViewerHandler {
 		@Override
 		public void run(){
 			long lastTime = System.currentTimeMillis();
+			
+			long lastImageTime = System.currentTimeMillis();
+			
 			boolean updating = false;
 			while(true){
-				if(!(System.currentTimeMillis() > lastTime + 17)) continue;
 				
-				if(handler.getMangaViewerFrame() != null && handler.currentScroll != 0){
+				if((System.currentTimeMillis() > lastImageTime + MangaHereManga.CONNECTIONDELAY)){
+					if(handler.onlineManga == null) continue;
+					MangaHereManga mangaHereManga = handler.onlineManga;
+					Manga manga  = handler.getCurrentManga();
 					
-					handler.yOffset = handler.getYOffset() + handler.currentScroll * SCROLLMULTIPLIER;
-
+					MangaImage mImage = mangaHereManga.getLastMangaImage();
+					if(mImage == null) continue;
 					
-					if(handler.currentScroll > 0){
-						//down
-						handler.currentScroll -= 1;
-					}else{
-						//up
-						handler.currentScroll += 1;
+					int chapter = mImage.getChapter();
+					int page = mImage.getPage();
+					
+					if(chapter - 1 > handler.getCurrentChapter()){
+						
+						continue;
 					}
 					
-					handler.getMangaViewerFrame().repaint();
+					if(page < manga.getPages(chapter) - 1){
+						handler.getImage(manga, chapter, page + 1);
+					}else if(chapter < manga.getTotalChapters()){
+						if(!(chapter + 1 >= manga.getTotalChapters())){
+							handler.getImage(manga, chapter + 1, 0);
+						}
+					}
+					
+					
+					
+					
+					
+					lastImageTime = System.currentTimeMillis();
 				}
-				if(handler.updateImages && !updating){		
-					updating = true;
-					if(handler.wasUpdateNext){
-						new Thread(() -> {
-							handler.loadNext();	
-						}).start();				
+				
+				if((System.currentTimeMillis() > lastTime + 17)){				
+					if(handler.getMangaViewerFrame() != null && handler.currentScroll != 0){
 						
-					}else{
+						handler.yOffset = handler.getYOffset() + handler.currentScroll * SCROLLMULTIPLIER;
+	
 						
-						new Thread(() -> {
-							handler.loadPrevious();
-						}).start();
+						if(handler.currentScroll > 0){
+							//down
+							handler.currentScroll -= 1;
+						}else{
+							//up
+							handler.currentScroll += 1;
+						}
 						
-						
+						handler.getMangaViewerFrame().repaint();
 					}
-					handler.updateImages = false;
-					updating = false;
-				}			
-				lastTime = System.currentTimeMillis();
+					if(handler.updateImages && !updating){		
+						updating = true;
+						if(handler.wasUpdateNext){
+							new Thread(() -> {
+								handler.loadNext();	
+							}).start();				
+							
+						}else{
+							
+							new Thread(() -> {
+								handler.loadPrevious();
+							}).start();
+							
+							
+						}
+						handler.updateImages = false;
+						updating = false;
+					}			
+					lastTime = System.currentTimeMillis();
+				}
 			}
 		}	
 	}
+	
+	
+	
 	
 	public void reload(){
 		loadImages();
@@ -188,6 +299,7 @@ public class MangaViewerHandler {
 			previousImage = getImage(currentManga, currentChapter - 1, currentManga.getPages(currentChapter - 1) - 1);
 			//System.out.println("Loaded previous in previous chapter");			
 		}
+
 		loading = false;
 	}
 	
@@ -197,6 +309,7 @@ public class MangaViewerHandler {
 
 		currentImage = getImage(currentManga, currentChapter, currentPage);
 		//System.out.println("Loaded current");
+
 		loading = false;
 	}
 	
@@ -208,13 +321,14 @@ public class MangaViewerHandler {
 			nextImage = getImage(currentManga, currentChapter, currentPage + 1);
 			//System.out.println("Loaded next");
 		}else if(currentChapter < currentManga.getTotalChapters()){
-			if(currentChapter + 1 >= currentManga.getTotalChapters()){
-				nextImage = null;
-				return;
+			if(!(currentChapter + 1 >= currentManga.getTotalChapters())){
+				nextImage = getImage(currentManga, currentChapter + 1, 0);
+			}else{
+				nextImage = null;				
 			}
-			nextImage = getImage(currentManga, currentChapter + 1, 0);
 			//System.out.println("Loaded next in next chapter");
 		}
+
 		loading = false;
 
 	}
@@ -268,16 +382,22 @@ public class MangaViewerHandler {
 		currentScroll = 0;
 		
 		
-		//This
 		if(currentPage >= currentManga.getPages(currentChapter)){
 			currentPage = 0;
 			currentChapter += 1;
 		}
 		previousImage = currentImage;
 		currentImage = nextImage;
+		
+		if(this.onlineManga != null){
+			this.onlineManga.setLoadedChapter(currentChapter);
+			this.onlineManga.setLoadedPage(currentPage);
+		}		
+		MangaProperties.saveOnlineMangas();
+		
+		
 		yOffset = 0;
 		
-		//This
 		getMangaViewerFrame().updateTitle();
 		
 		properties.saveProperties();
@@ -294,7 +414,6 @@ public class MangaViewerHandler {
 		if(updateImages || loading || currentManga == null) return;
 		if(currentPage <= 0 && currentChapter == 0) return;
 		currentPage--;
-		
 		currentScroll = 0;
 		
 		if(currentPage < 0){
@@ -305,6 +424,12 @@ public class MangaViewerHandler {
 		nextImage = currentImage;
 		currentImage = previousImage;
 		
+		if(this.onlineManga != null){
+			this.onlineManga.setLoadedChapter(currentChapter);
+			this.onlineManga.setLoadedPage(currentPage);
+		}
+		MangaProperties.saveOnlineMangas();
+
 		yOffset = 0;
 		getMangaViewerFrame().updateTitle();
 
@@ -403,6 +528,10 @@ public class MangaViewerHandler {
 		return MangaFitType.HEIGHT;		
 	}
 	
+	public MangaProperties getProperties(){
+		return properties;
+	}
+	
 	public void setCurrentChapter(int chapter){
 		this.currentChapter = chapter;
 	}
@@ -469,6 +598,10 @@ public class MangaViewerHandler {
 	
 	public void setCurrentScroll(int scroll){
 		this.currentScroll = scroll;
+	}
+	
+	public MangaHereManga getOnlineManga(){
+		return onlineManga;
 	}
 	
 }

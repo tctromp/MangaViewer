@@ -22,7 +22,7 @@ public class OnlineManga extends Manga{
 	}
 	
 	public String getChapterName(int chapter){
-		return manga.getChapterNames().get(chapter);
+		return manga.getOnlineMangaChapters().get(chapter).getName();
 	}
 
 }

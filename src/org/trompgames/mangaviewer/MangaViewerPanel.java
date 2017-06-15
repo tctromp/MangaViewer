@@ -16,6 +16,7 @@ public class MangaViewerPanel extends JPanel{
 	public MangaViewerPanel(MangaViewerHandler handler) {
 		this.handler = handler;
 		this.setFocusable(true);
+		
 	}
 	
 

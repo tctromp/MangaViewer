@@ -18,11 +18,12 @@ import org.trompgames.mangaviewer.MangaStatus;
 
 public class MangaHereManga {
 
-	public static final int CONNECTIONDELAY = 250;
+	public static final int CONNECTIONDELAY = 500;
 	
 	private Manga manga;
 	private String urlString;
 	
+	private boolean validURL = true;
 	
 	private String title;
 	private BufferedImage cover;
@@ -33,62 +34,92 @@ public class MangaHereManga {
 	private MangaStatus status;
 	private int rank;
 	
+	private int loadedChapter;
+	private int loadedPage;
+	
+	private ArrayList<MangaImage> mangaImages = new ArrayList<MangaImage>();
+	
+	
 	private ArrayList<OnlineMangaChapter> onlineMangaChapters = new ArrayList<OnlineMangaChapter>();
 	
-	private ArrayList<String> chapterURLS = new ArrayList<String>();
-	private ArrayList<String> chapterNames = new ArrayList<String>();
-	private ArrayList<String> chapterDetails = new ArrayList<String>();
+
 	
 	private ArrayList<String> pageContents = new ArrayList<String>();
+	
+	
+	public MangaHereManga(String urlString, String title, double rating, ArrayList<MangaCategory> genres, String author, String artist, MangaStatus status, int rank, ArrayList<OnlineMangaChapter> chapters, int loadedChapter, int loadedPage){
+		this.urlString = urlString;
+		this.title = title;
+		this.rating = rating;
+		this.genres = genres;
+		this.author = author;
+		this.artist = artist;
+		this.status = status;
+		this.rank = rank;
+		this.onlineMangaChapters = chapters;
+		this.manga = new OnlineManga(title, this);
+
+		this.loadedChapter = loadedChapter;
+		this.loadedPage = loadedPage;
+		
+		
+		//TODO set cover 
+	}
+	
+	
+	
 	
 	public MangaHereManga(String urlString){
 		this.urlString = urlString;		
 		
-		loadHtml();        
+		if(!loadHtml()){
+			validURL = false;
+			return;
+		}	
 		
 		loadTitle();
-		System.out.println("Title: " + title);
+		//System.out.println("Title: " + title);
 		
 		
 		loadCover();
 		
 		
 		loadRating();
-		System.out.println("Rating: " + rating);
+		//System.out.println("Rating: " + rating);
 		
 		loadGenres();
-		System.out.print("Genres: ");
+		//System.out.print("Genres: ");
 		for(MangaCategory mc : genres){
-			System.out.print(mc + " ");
+			//System.out.print(mc + " ");
 		}
-		System.out.println();
+		//System.out.println();
 		
 		
 		loadAuthor();
-		System.out.println("Author: " + author);
+		//System.out.println("Author: " + author);
 		
 		
 		loadArtist();
-		System.out.println("Artist: " + artist);
+		//System.out.println("Artist: " + artist);
 		
 		
 		
 		loadStatus();
-		System.out.println("Status: " + status);
+		//System.out.println("Status: " + status);
 		
 		
 		loadRank();
-		System.out.println("Rank: " + rank);
+		//System.out.println("Rank: " + rank);
 		
 		
 		loadChapters();
 		//System.out.println("Chapters: ");
 		
-		for(int i = 0; i < chapterURLS.size(); i++){
+		//for(int i = 0; i < chapterURLS.size(); i++){
 			//String url = chapterURLS.get(i);
 			//String detail = chapterDetails.get(i);
 			//System.out.println(url + " - " + detail);			
-		}		
+		//}		
 		
 		//delay(5000);
 			
@@ -107,17 +138,18 @@ public class MangaHereManga {
 		}
 	}
 
-	private void loadHtml(){
+	private boolean loadHtml(){
 		try {
 			URL url = new URL(urlString);			
 			 BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));		        
-		        String inputLine;
-		        while ((inputLine = in.readLine()) != null){
-		        	pageContents.add(inputLine);
-		        }		        
-		        in.close();			
+		     String inputLine;
+		     while ((inputLine = in.readLine()) != null){
+		      	pageContents.add(inputLine);
+		     }		        
+		     in.close();
+		     return true;		        
 		} catch (IOException e) {
-			e.printStackTrace();
+			return false;
 		}
 	}
 	
@@ -244,6 +276,11 @@ public class MangaHereManga {
 	private void loadChapters(){
 		boolean getInfo = false;
 		boolean skip = false;
+		
+		ArrayList<String> chapterURLS = new ArrayList<String>();
+		ArrayList<String> chapterNames = new ArrayList<String>();
+		ArrayList<String> chapterDetails = new ArrayList<String>();
+		
 		for(String line : pageContents){
 			if(line.trim().indexOf("<a class=\"color_0077\" href=\"http://www.mangahere.co/manga") == 0){
 				String s = line.replace("<a class=\"color_0077\" href=\"", "");
@@ -252,32 +289,83 @@ public class MangaHereManga {
 				chapterURLS.add(0, s);
 				getInfo = true;
 				skip = true;
-			}else if(getInfo && skip == false){
+			}else if(getInfo && !skip){
 				String s = line.replace("<span class=\"mr6\"></span>", "");
 				s = s.replace("</span>", "");
 				s = s.trim();
 				chapterDetails.add(0, s);
 				getInfo = false;
-			}else{
+			}else if(getInfo && skip){
+				String s = line.replace("</a>", "");
+				s = s.trim();
+				chapterNames.add(0, s);	
 				skip = false;
 			}
 		}		
+
+		for(int i = 0; i < chapterNames.size(); i++){
+			
+			String name = chapterNames.get(i);
+			String details = chapterDetails.get(i);
+			String chapterURL = chapterURLS.get(i);
+			onlineMangaChapters.add(new OnlineMangaChapter(name, details, i, chapterURL, null, chapterNames.size()));
+
+			
+			
+		}
+		
+
+		
 	}
 	
+	public MangaImage getLastMangaImage(){
+		
+		if(mangaImages.size() == 0) return null;
+		
+		MangaImage last = mangaImages.get(0);
+		
+		for(MangaImage i : mangaImages){
+			if(i.equals(last)) continue;
+			
+			if(last.getChapter() < i.getChapter()){
+				last = i;
+				
+			}else if((last.getChapter() == i.getChapter() && (i.getPage() > last.getPage()))){
+				last = i;
+			}
+			
+			
+		}
+		return last;
+		
+	}
+	
+	
 	public BufferedImage getImage(int chapter, int page){
+		
+		for(MangaImage i : mangaImages){
+			if((i.getChapter() == chapter) && (i.getPage() == page)){
+				return i.getImage();
+			}
+		}		
 		
 		OnlineMangaChapter c = getOnlineMangaChapter(chapter);
 		
 		ArrayList<String> imageBaseURLS;
 		
-		if(c == null){		
+		
+		if(c.getBaseURLS() == null){		
 			imageBaseURLS = getChapterImageBaseURLS(chapter);
-			onlineMangaChapters.add(new OnlineMangaChapter("temp", chapterDetails.get(chapter), chapter, imageBaseURLS));
+			onlineMangaChapters.get(chapter).setBaseURLS(imageBaseURLS);;
 		}else{
 			imageBaseURLS = c.getBaseURLS();
 		}		
+		
 		try {
-			return getImage(new URL(imageBaseURLS.get(page)));
+			BufferedImage i = getImage(new URL(imageBaseURLS.get(page)));
+			mangaImages.add(new MangaImage(i, chapter, page));
+
+			return i;
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
 		}
@@ -333,7 +421,7 @@ public class MangaHereManga {
 		ArrayList<String> pageLines = new ArrayList<String>();		
 		
 		try {
-			URL url = new URL(chapterURLS.get(chapter));			
+			URL url = new URL(onlineMangaChapters.get(chapter).getBaseURL());			
 			 BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));		        
 		        String inputLine;
 		        while ((inputLine = in.readLine()) != null){
@@ -367,9 +455,9 @@ public class MangaHereManga {
 	public int getPages(int chapter){		
 		OnlineMangaChapter c = getOnlineMangaChapter(chapter);		
 		ArrayList<String> imageBaseURLS;		
-		if(c == null){		
+		if(c.getBaseURLS() == null){		
 			imageBaseURLS = getChapterImageBaseURLS(chapter);
-			onlineMangaChapters.add(new OnlineMangaChapter("temp", chapterDetails.get(chapter), chapter, imageBaseURLS));
+			c.setBaseURLS(imageBaseURLS);
 		}else{
 			imageBaseURLS = c.getBaseURLS();
 		}		
@@ -377,10 +465,12 @@ public class MangaHereManga {
 	}
 	
 	public int getTotalChapters(){
-		return chapterURLS.size();
+		return onlineMangaChapters.size();
 	}
 	
-
+	public boolean hasValidURL(){
+		return validURL;
+	}
 
 	public String getUrlString() {
 		return urlString;
@@ -418,18 +508,6 @@ public class MangaHereManga {
 		return rank;
 	}
 
-	public ArrayList<String> getChapterURLS() {
-		return chapterURLS;
-	}
-
-	public ArrayList<String> getChapterNames() {
-		return chapterNames;
-	}
-
-	public ArrayList<String> getChapterDetails() {
-		return chapterDetails;
-	}
-	
 	public Manga getManga(){
 		return manga;
 	}
@@ -441,31 +519,77 @@ public class MangaHereManga {
 		return null;		
 	}
 	
-	//Chapters:
-	//<a class="color_0077" href="http://www.mangahere.co/manga
+	public ArrayList<OnlineMangaChapter> getOnlineMangaChapters(){
+		return onlineMangaChapters;
+	}
+	
+	public int getLoadedChapter(){
+		return loadedChapter;
+	}
+	public int getLoadedPage(){
+		return loadedPage;
+	}
+	
+	public void setLoadedChapter(int chapter){
+		this.loadedChapter = chapter;
+	}
+	
+	public void setLoadedPage(int page){
+		this.loadedPage = page;
+	}
+	
+	@Override
+	public String toString(){
+		
+		String s = "Title: " + title + "\n";
+		
+		//System.out.println("Title: " + title);
+		
+		
+		s += "Rating: " + rating + "\n";
+		
+		//System.out.println("Rating: " + rating);
+		
+		s += "Genres: ";
+		
+		//System.out.print("Genres: ");
+		for(MangaCategory mc : genres){
+			s += mc + " ";
+			//System.out.print(mc + " ");
+		}
+		
+		s += "\n";
+		//System.out.println();
+		
+		s += "Author: " + author + "\n";
+		
+		//System.out.println("Author: " + author);
+	
+		s += "Artist: " + artist + "\n";
+		
+		
+		//System.out.println("Artist: " + artist);
+		
+		s += "Status: " + status + "\n";
+		
+		//System.out.println("Status: " + status);
+		
+		s += "Rank: " + rank + "\n";
+		
+		//System.out.println("Rank: " + rank);
+		
+		s += "Chapters: \n";
+		
+		//System.out.println("Chapters: ");
+		
+		for(int i = 0; i < onlineMangaChapters.size(); i++){
+			s += onlineMangaChapters.get(i).getBaseURL() + " - " + onlineMangaChapters.get(i).getDetails() + "\n";
+			//String url = chapterURLS.get(i);
+			//String detail = chapterDetails.get(i);
+			//System.out.println(url + " - " + detail);			
+		}		
+		return s;
+	}
 	
 
-	//private void
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
 }
