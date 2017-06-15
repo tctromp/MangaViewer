@@ -1,6 +1,6 @@
 # MangaViewer
 
-TODO:
+To Do/To Add:
 
 Local manga list
 
