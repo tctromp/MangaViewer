@@ -1,4 +1,4 @@
-package org.trompgames.mangaviewer;
+package org.trompgames.mangainfo;
 
 public enum MangaStatus {
 

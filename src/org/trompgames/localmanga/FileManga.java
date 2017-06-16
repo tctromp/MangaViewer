@@ -1,6 +1,9 @@
-package org.trompgames.mangaviewer;
+package org.trompgames.localmanga;
 
 import java.util.ArrayList;
+
+import org.trompgames.mangabase.Manga;
+import org.trompgames.mangabase.MangaChapter;
 
 public class FileManga extends Manga{
 

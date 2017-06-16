@@ -2,7 +2,7 @@ package org.trompgames.onlinemanga;
 
 import java.util.ArrayList;
 
-import org.trompgames.mangaviewer.MangaChapter;
+import org.trompgames.mangabase.MangaChapter;
 
 public class OnlineMangaChapter extends MangaChapter{
 

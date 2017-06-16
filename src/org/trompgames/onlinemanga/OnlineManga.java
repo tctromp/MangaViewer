@@ -1,6 +1,6 @@
 package org.trompgames.onlinemanga;
 
-import org.trompgames.mangaviewer.Manga;
+import org.trompgames.mangabase.Manga;
 
 public class OnlineManga extends Manga{
 

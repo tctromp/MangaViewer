@@ -2,7 +2,7 @@ package org.trompgames.onlinemanga;
 
 import java.awt.image.BufferedImage;
 
-import org.trompgames.mangaviewer.Manga;
+import org.trompgames.mangabase.Manga;
 
 public class MangaImage {
 

@@ -12,9 +12,9 @@ import java.util.zip.GZIPInputStream;
 
 import javax.imageio.ImageIO;
 
-import org.trompgames.mangaviewer.Manga;
-import org.trompgames.mangaviewer.MangaCategory;
-import org.trompgames.mangaviewer.MangaStatus;
+import org.trompgames.mangabase.Manga;
+import org.trompgames.mangainfo.MangaCategory;
+import org.trompgames.mangainfo.MangaStatus;
 
 public class MangaHereManga {
 

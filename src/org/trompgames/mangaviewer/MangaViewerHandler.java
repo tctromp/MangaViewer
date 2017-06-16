@@ -13,6 +13,13 @@ import java.util.zip.ZipFile;
 
 import javax.imageio.ImageIO;
 
+import org.trompgames.gui.MangaViewerFrame;
+import org.trompgames.gui.MangaViewerPanel;
+import org.trompgames.localmanga.FileManga;
+import org.trompgames.localmanga.FileMangaChapter;
+import org.trompgames.mangabase.Manga;
+import org.trompgames.mangainfo.MangaFitType;
+import org.trompgames.mangaloaing.MangaProperties;
 import org.trompgames.onlinemanga.MangaHereManga;
 import org.trompgames.onlinemanga.MangaImage;
 import org.trompgames.onlinemanga.OnlineManga;
@@ -72,22 +79,9 @@ public class MangaViewerHandler {
 		this.frame = new MangaViewerFrame(this, screenWidth, screenHeight);
 		this.panel = frame.getMangaViewerPanel();		
 		
-		
-			
-		//onlineManga = new MangaHereManga("http://www.mangahere.co/manga/berserk/");
-		//this.currentManga = onlineManga.getManga();
-		
-		
-		
-		
-		
-		
-		
-		
+
 		this.getMangaViewerFrame().updateTitle();
-		
-		//System.out.println("Total Pages: " + currentManga.getTotalPages());
-		//System.out.println("Cumulative Pages: " + currentManga.getCumulativePages(currentPage, currentChapter));
+
 	}
 
 	public void setOnlineManga(String url){

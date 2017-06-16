@@ -1,4 +1,4 @@
-package org.trompgames.mangaviewer;
+package org.trompgames.mangaloaing;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -15,6 +15,10 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
+import org.trompgames.mangabase.Manga;
+import org.trompgames.mangainfo.MangaCategory;
+import org.trompgames.mangainfo.MangaStatus;
+import org.trompgames.mangaviewer.MangaViewerHandler;
 import org.trompgames.onlinemanga.MangaHereManga;
 import org.trompgames.onlinemanga.OnlineMangaChapter;
 
@@ -84,7 +88,6 @@ public class MangaProperties {
 		
 		JSONParser parser = new JSONParser();
 		
-		System.out.println("starting");
 		
 		try {
 			FileReader fr = new FileReader("mangaData.json");
@@ -121,7 +124,6 @@ public class MangaProperties {
 		
 		JSONParser parser = new JSONParser();
 		
-		System.out.println("starting");
 		
 		ArrayList<MangaHereManga> mangaHereMangas = new ArrayList<>();
 		

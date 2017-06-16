@@ -1,4 +1,4 @@
-package org.trompgames.mangaviewer;
+package org.trompgames.mangabase;
 
 public abstract class Manga {
 

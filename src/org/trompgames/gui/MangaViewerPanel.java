@@ -1,4 +1,4 @@
-package org.trompgames.mangaviewer;
+package org.trompgames.gui;
 
 import java.awt.Color;
 import java.awt.Graphics;
@@ -7,16 +7,16 @@ import java.awt.image.BufferedImage;
 
 import javax.swing.JPanel;
 
+import org.trompgames.mangainfo.MangaFitType;
+import org.trompgames.mangaviewer.MangaViewerHandler;
+
 public class MangaViewerPanel extends JPanel{
 	
 	private MangaViewerHandler handler;
-
-	
 	
 	public MangaViewerPanel(MangaViewerHandler handler) {
 		this.handler = handler;
-		this.setFocusable(true);
-		
+		this.setFocusable(true);		
 	}
 	
 
@@ -30,7 +30,7 @@ public class MangaViewerPanel extends JPanel{
 		
 		g2d.setColor(flat);		
 		
-		g2d.fillRect(0, 0, this.getWidth() - 1, this.getHeight() - 1);
+		g2d.fillRect(0, 0, this.getWidth(), this.getHeight());
 		
 		
 		int scrollWidth = (int) Math.round(1.0 * this.getWidth()/3 * handler.getScrollWidthMultiplier());		
@@ -38,14 +38,14 @@ public class MangaViewerPanel extends JPanel{
 		
 		if(handler.getCurrentManga() == null){
 		
+			/*
 			Color darker = new Color(73, 80, 80);
 			
 			g2d.setColor(darker);	
 			
 			int border = 25;
-			
 			g2d.fillRect(this.getWidth()/2 - scrollWidth/2, border, scrollWidth - 1, this.getHeight() - 1 - 2*border);
-			
+			*/
 			
 			return;
 		}
@@ -99,7 +99,6 @@ public class MangaViewerPanel extends JPanel{
 		
 		int height = this.getHeight() - 2*buffer;
 		
-		//int newWidth = (int) Math.round(1.0 * this.getHeight() * (1.0 * imageWidth/imageHeight));
 		int newWidth = (int) Math.round(1.0 * height * (1.0 * imageWidth/imageHeight));
 
 		
