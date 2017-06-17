@@ -141,7 +141,8 @@ public class MangaHereManga {
 	private boolean loadHtml(){
 		try {
 			URL url = new URL(urlString);			
-			 BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));		        
+			 BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream(), "UTF-8"));	
+			 
 		     String inputLine;
 		     while ((inputLine = in.readLine()) != null){
 		      	pageContents.add(inputLine);
@@ -254,6 +255,7 @@ public class MangaHereManga {
 				String s = line.replace("<li><label>Status:</label>", "");
 				s = s.replace("</li>", "");
 				s = s.trim();
+				System.out.println(s);
 				status = MangaStatus.getStatus(s);
 				return;
 			}			

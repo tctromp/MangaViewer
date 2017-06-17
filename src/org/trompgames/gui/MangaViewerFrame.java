@@ -72,14 +72,11 @@ public class MangaViewerFrame extends JFrame{
 		
 	}
 	
-	
-	
-	public void updateTitle(){
+	public String getMangaFrameTitle(){
 		Manga m = handler.getCurrentManga();
 		
 		if(m == null){
-			this.setTitle("MangaViewer");
-			return;
+			return "";
 		}
 		
 		if(m instanceof FileManga){
@@ -103,15 +100,17 @@ public class MangaViewerFrame extends JFrame{
 			
 			s += "%";
 			
-			this.setTitle("MangaViewer - " + chapter.getName() + " - Page: (" + (handler.getCurrentPage() + 1) + "/" + chapter.getPages() + ") - " + cumPages + "/" + manga.getTotalPages() + " - " + s);
+			return ("MangaViewer - " + chapter.getName() + " - Page: (" + (handler.getCurrentPage() + 1) + "/" + chapter.getPages() + ") - " + cumPages + "/" + manga.getTotalPages() + " - " + s);
 		}else{
 			
 			OnlineManga manga = (OnlineManga) m;
 			
-			this.setTitle("MangaViewer - " +  " - Page: (" + (handler.getCurrentPage() + 1) + "/" + manga.getPages(handler.getCurrentChapter()) + ")");
+			return ("MangaViewer - " + manga.getChapterName(handler.getCurrentChapter()) +  " - Page: (" + (handler.getCurrentPage() + 1) + "/" + manga.getPages(handler.getCurrentChapter()) + ")");
 		}
-
-		
+	}
+	
+	public void updateTitle(){
+		this.setTitle(getMangaFrameTitle());
 	}
 	
 	public void addKeyListener(){

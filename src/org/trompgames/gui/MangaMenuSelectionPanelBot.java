@@ -71,7 +71,7 @@ public class MangaMenuSelectionPanelBot extends JPanel{
 			String name = ch.getName();
 			String detail = ch.getDetails();
 			
-			String currentString = ((currentChapter == i) && (currentPage != 0)) ? "(Current) " : "";
+			String currentString = ((currentChapter == i) && ((currentChapter != 0) || (currentPage != 0))) ? "(Current) " : "";
 			
 			
 			
@@ -83,8 +83,7 @@ public class MangaMenuSelectionPanelBot extends JPanel{
 			
 		}
 		
-		JList<String> chapterList = panel.getChapterList();
-		
+		JList<String> chapterList = panel.getChapterList();		
 		chapterList.setModel(model);
 		chapterList.setSelectedIndex(currentChapter);
 	}

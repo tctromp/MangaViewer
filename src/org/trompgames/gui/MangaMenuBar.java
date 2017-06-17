@@ -21,6 +21,8 @@ public class MangaMenuBar extends JMenuBar{
 		
 		JMenu menu = new JMenu("Manga");
 		
+		
+		
 		JMenuItem openFileButton = new JMenuItem("Open");
 		openFileButton.addActionListener(new ActionListener(){
 

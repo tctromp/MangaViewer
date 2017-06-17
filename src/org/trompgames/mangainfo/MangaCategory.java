@@ -19,7 +19,7 @@ public enum MangaCategory {
 	MECHA("Mecha"),
 	MYSTERY("Mystery"),
 	ONESHOT("One Shot"),
-	PHYCHOLOGICAL("Phychological"),
+	PSYCHOLOGICAL("Psychological"),
 	ROMANCE("Romance"),
 	SCHOOLLIFE("School Life"),
 	SCIFI("Sci-fi"),
