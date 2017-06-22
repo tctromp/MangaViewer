@@ -292,8 +292,8 @@ public class MangaHereManga {
 				getInfo = true;
 				skip = true;
 			}else if(getInfo && !skip){
-				String s = line.replace("<span class=\"mr6\"></span>", "");
-				s = s.replace("</span>", "");
+				String s = line.replace("<span class=\"mr6\">", "");
+				s = s.replaceAll("</span>", "");
 				s = s.trim();
 				chapterDetails.add(0, s);
 				getInfo = false;
