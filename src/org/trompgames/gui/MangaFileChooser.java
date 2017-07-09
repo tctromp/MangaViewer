@@ -37,7 +37,8 @@ public class MangaFileChooser extends JFileChooser{
 		this.addActionListener(new ActionListener(){
 
 			@Override
-			public void actionPerformed(ActionEvent event) {				
+			public void actionPerformed(ActionEvent event) {		
+				if(mangaFileChooser.getSelectedFile() == null) return;
 				handler.loadManga(mangaFileChooser.getSelectedFile());
 				handler.reload();
 			}			

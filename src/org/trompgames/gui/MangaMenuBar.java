@@ -1,9 +1,9 @@
 package org.trompgames.gui;
 
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
@@ -15,12 +15,12 @@ public class MangaMenuBar extends JMenuBar{
 
 	
 	private JSplitPane splitPane;
-
+	private JMenu titleMenu;
 	
 	public MangaMenuBar(MangaViewerHandler handler) {
 		
 		JMenu menu = new JMenu("Manga");
-		
+		menu.setFont(new Font(menu.getFont().getFontName(), 0, 16));
 		
 		
 		JMenuItem openFileButton = new JMenuItem("Open");
@@ -74,26 +74,22 @@ public class MangaMenuBar extends JMenuBar{
 				
 				if(event.getActionCommand().equalsIgnoreCase("Fullscreen")){
 
-					handler.getMangaViewerFrame().setExtendedState(JFrame.MAXIMIZED_BOTH); 
-					handler.getMangaViewerFrame().dispose();
-					handler.getMangaViewerFrame().setUndecorated(true);
-					handler.getMangaViewerFrame().setVisible(true);
+					handler.getMangaViewerFrame().setFullscreen(true);
 
 					//handler.getMangaViewerFrame().revalidate();
 					fullScreenButton.setActionCommand("Exit Fullscreen");
 					fullScreenButton.setName("Exit Fullscreen");
-
+					fullScreenButton.setText("Exit Fullscreen");
 				}else{
 					//handler.getMangaViewerFrame().setExtendedState(JFrame.);
-					handler.getMangaViewerFrame().dispose();
-					handler.getMangaViewerFrame().setUndecorated(false);
-					handler.getMangaViewerFrame().setVisible(true);
+					
+					handler.getMangaViewerFrame().setFullscreen(false);
 
 					//handler.getMangaViewerFrame().revalidate();
 
 					fullScreenButton.setActionCommand("Fullscreen");
 					fullScreenButton.setName("Fullscreen");
-
+					fullScreenButton.setText("Fullscreen");
 				}
 			}
 			
@@ -127,6 +123,20 @@ public class MangaMenuBar extends JMenuBar{
 			
 		});
 		
+		JMenuItem exitButton = new JMenuItem("Exit");
+		exitButton.addActionListener(new ActionListener(){
+
+			@Override
+			public void actionPerformed(ActionEvent event) {
+				System.exit(0);				
+			}
+			
+			
+			
+			
+		});
+		
+		
 		menu.add(openURLButton);
 		
 		
@@ -134,10 +144,21 @@ public class MangaMenuBar extends JMenuBar{
 		menu.add(previousChapterButton);
 		menu.add(nextChapterButton);
 		
+		menu.add(exitButton);
+		
 		this.add(menu);
+		
+		titleMenu = new JMenu("MangaViewer");
+		titleMenu.setFont(new Font(menu.getFont().getFontName(), 0, 16));
+
+		this.add(titleMenu);
+		
 		
 	}
 
+	public JMenu getTitleMenu(){
+		return titleMenu;
+	}
 
 	public JSplitPane getSplitPane() {
 		return splitPane;

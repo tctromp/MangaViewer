@@ -4,6 +4,8 @@ import java.awt.Font;
 import java.awt.GridLayout;
 
 import javax.swing.BorderFactory;
+import javax.swing.ImageIcon;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
 
@@ -14,6 +16,9 @@ public class MangaMenuSelectionPanelMid extends JPanel{
 
 	private MangaMenuSelectionPanel panel;
 	
+	private JPanel topRightPanel; 
+	
+	
 	public MangaMenuSelectionPanelMid(MangaMenuSelectionPanel panel) {
 		this.panel = panel;
 		
@@ -22,12 +27,7 @@ public class MangaMenuSelectionPanelMid extends JPanel{
 		//midPanel.setLayout(new BoxLayout(midPanel, BoxLayout.LINE_AXIS));
 
 		JPanel topLeftPanel = new JPanel();
-		JPanel topRightPanel = new JPanel();
-		
-		/*
-		 * if(manga.getCover() != null)
-			topRightPanel.add(new JLabel(new ImageIcon(manga.getCover())));		
-		 */
+		topRightPanel = new JPanel();
 		
 		
 		topLeftPanel.setBorder(BorderFactory.createTitledBorder("Info: "));
@@ -61,6 +61,11 @@ public class MangaMenuSelectionPanelMid extends JPanel{
 		this.add(topLeftPanel);
 		this.add(topRightPanel);
 		panel.add(this);
+	}
+	
+	public void loadCover(MangaHereManga manga){
+		if(manga.getCover() != null)
+			topRightPanel.add(new JLabel(new ImageIcon(manga.getCover())));	
 	}
 	
 	public void loadData(MangaHereManga manga){

@@ -14,9 +14,24 @@ public class MangaViewerPanel extends JPanel{
 	
 	private MangaViewerHandler handler;
 	
-	public MangaViewerPanel(MangaViewerHandler handler) {
+	public MangaViewerPanel(MangaViewerHandler handler, MangaViewerFrame frame) {
 		this.handler = handler;
 		this.setFocusable(true);		
+		
+		Color flat = new Color(66, 73, 73);
+		
+		/*
+		Color flat = new Color(1.0f,1.0f,1.0f,0f);
+		frame.setUndecorated(true);
+
+		*/
+		
+		/*
+		frame.getContentPane().setBackground(flat);
+		frame.setBackground(flat);
+	
+		this.setBackground(flat);
+	    */
 	}
 	
 
@@ -27,6 +42,8 @@ public class MangaViewerPanel extends JPanel{
 		
 		
 		Color flat = new Color(66, 73, 73);
+		//Color flat = new Color(1.0f, 1.0f, 1.0f, 0.5f);
+		
 		
 		g2d.setColor(flat);		
 		
@@ -56,6 +73,7 @@ public class MangaViewerPanel extends JPanel{
 			return;
 		}		
 		
+		
 		int imageWidth = image.getWidth();
 		int imageHeight = image.getHeight();
 		
@@ -67,8 +85,11 @@ public class MangaViewerPanel extends JPanel{
 		if(type.equals(MangaFitType.SCROLL)){
 			fitScroll(g2d, image, imageWidth, imageHeight, scrollWidth);
 		}else if(type.equals(MangaFitType.WIDTH)){
+			
 			fitWidth(g2d, image, imageWidth, imageHeight);			
-		}else{			
+		}else{		
+			
+			
 			fitHeight(g2d, image, imageWidth, imageHeight, buffer);		
 		}
 		
@@ -80,8 +101,8 @@ public class MangaViewerPanel extends JPanel{
 	
 	public void fitWidth(Graphics2D g2d, BufferedImage image, int imageWidth, int imageHeight){
 		int newHeight = (int) Math.round(1.0 * this.getWidth() * (1.0 * imageHeight/imageWidth));
-
-		g2d.drawImage(image, 0, -handler.getYOffset(), this.getWidth(), newHeight, null);
+		
+		g2d.drawImage(image, 0, -handler.getYOffset() + ((int) (1.0 * this.getHeight() - newHeight)/2), this.getWidth(), newHeight, null);
 		
 		
 	}
@@ -99,6 +120,7 @@ public class MangaViewerPanel extends JPanel{
 		
 		int height = this.getHeight() - 2*buffer;
 		
+		
 		int newWidth = (int) Math.round(1.0 * height * (1.0 * imageWidth/imageHeight));
 
 		
@@ -108,6 +130,8 @@ public class MangaViewerPanel extends JPanel{
 		}
 		
 		int xOffset = (int) Math.round(1.0 * this.getWidth()/2 - 1.0 * newWidth/2);
+		
+		
 		
 		g2d.drawImage(image, xOffset, buffer - handler.getYOffset(), newWidth, height - 1, null);
 	}

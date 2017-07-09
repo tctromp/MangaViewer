@@ -62,7 +62,9 @@ public class MangaMenuSelectionPanelTop extends JPanel{
 				MangaHereManga manga = mangas.get(panel.getMangaList().getSelectedIndex());
 				
 				panel.getMidPanel().loadData(manga);
-				panel.getBotPanel().loadData(manga);				
+				panel.getBotPanel().loadData(manga);
+				//manga.loadCover();
+				//panel.getMidPanel().loadCover(manga);
 			}
 			
 			
@@ -88,12 +90,11 @@ public class MangaMenuSelectionPanelTop extends JPanel{
 				handler.setCurrentChapter(chapterList.getSelectedIndex());
 				
 				
-				
 				handler.setOnlineManga(mangas.get(panel.getMangaList().getSelectedIndex()), chapterList.getSelectedIndex());
 				
 				
 				handler.getMangaViewerPanel().requestFocusInWindow();
-			
+				//handler.reload();
 			}				
 			
 		});

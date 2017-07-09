@@ -3,9 +3,11 @@ package org.trompgames.onlinemanga;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.StringTokenizer;
 import java.util.zip.GZIPInputStream;
@@ -18,7 +20,7 @@ import org.trompgames.mangainfo.MangaStatus;
 
 public class MangaHereManga {
 
-	public static final int CONNECTIONDELAY = 500;
+	public static final int CONNECTIONDELAY = 250;
 	
 	private Manga manga;
 	private String urlString;
@@ -63,6 +65,7 @@ public class MangaHereManga {
 		this.loadedPage = loadedPage;
 		
 		
+		
 		//TODO set cover 
 	}
 	
@@ -70,6 +73,8 @@ public class MangaHereManga {
 	
 	
 	public MangaHereManga(String urlString){
+		
+		long startTime = System.currentTimeMillis();
 		this.urlString = urlString;		
 		
 		if(!loadHtml()){
@@ -127,6 +132,8 @@ public class MangaHereManga {
 		
 		manga = new OnlineManga(title, this);
 		
+		System.out.println("Time taken: " + (System.currentTimeMillis() - startTime) + "ms");
+		
 		//getImage(1, 1);
 	}
 	
@@ -140,8 +147,25 @@ public class MangaHereManga {
 
 	private boolean loadHtml(){
 		try {
-			URL url = new URL(urlString);			
-			 BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream(), "UTF-8"));	
+			URL url = new URL(urlString);
+			URLConnection con = url.openConnection();
+			con.setRequestProperty("Accept-Encoding", "gzip");
+			InputStream is = con.getInputStream();
+			/*
+			 * URLConnection con = url.openConnection();
+			 
+			 	InputStream is = con.getInputStream();
+			 	con.setRequestProperty("Accept-Encoding", "gzip");
+			 	BufferedReader in = null;
+			 * 
+			 */
+			
+			
+			 //BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream(), "UTF-8"));	
+			
+			BufferedReader in = new BufferedReader(new InputStreamReader(new GZIPInputStream(is)));
+			
+			 System.out.println("[LoadHTML] Request");
 			 
 		     String inputLine;
 		     while ((inputLine = in.readLine()) != null){
@@ -166,7 +190,7 @@ public class MangaHereManga {
 		}		
 	}
 	
-	private void loadCover(){
+	public void loadCover(){
 		for(String line : pageContents){
 			if(line.contains("<img src=\"http://h.mhcdn.net/store/manga/")){
 				String s = line.replace("<img src=\"", "");
@@ -343,6 +367,7 @@ public class MangaHereManga {
 	}
 	
 	
+	
 	public BufferedImage getImage(int chapter, int page){
 		
 		for(MangaImage i : mangaImages){
@@ -366,7 +391,7 @@ public class MangaHereManga {
 		try {
 			BufferedImage i = getImage(new URL(imageBaseURLS.get(page)));
 			mangaImages.add(new MangaImage(i, chapter, page));
-
+			System.out.println("Loaded Ch." + chapter + " Pg." + page);
 			return i;
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
@@ -380,24 +405,46 @@ public class MangaHereManga {
 		ArrayList<String> pageLines = new ArrayList<String>();	
 		
 		try {
-			 BufferedReader in = new BufferedReader(new InputStreamReader(new GZIPInputStream(url.openStream())));		        
-		     String inputLine;
-		     while ((inputLine = in.readLine()) != null){
-		      	pageLines.add(inputLine);
-		     }		        
-		     in.close();			
-		} catch (IOException e) {
-			
-			try {
-				BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));
+			 System.out.println("[GetImage] Request 1");
+			 	URLConnection con = url.openConnection();
+			 	con.setRequestProperty("Accept-Encoding", "gzip");
+
+			 	
+			 	InputStream is = con.getInputStream();
+			 	BufferedReader in = null;
+			 	
+			 	System.out.println(con.getContentEncoding());
+			 	
+			 	if(con.getContentEncoding() != null && con.getContentEncoding().equals("gzip")){
+			 		in = new BufferedReader(new InputStreamReader(new GZIPInputStream(is)));
+			 	}else{
+					in = new BufferedReader(new InputStreamReader(is));
+
+			 	}
+			 	
+			 	
 				String inputLine;
 			    while ((inputLine = in.readLine()) != null){
 			     	pageLines.add(inputLine);
 			    }		        
-			     in.close();	
-			} catch (IOException e1) {
-				e1.printStackTrace();
-			}		        
+			     in.close();
+		} catch (IOException e) {
+			System.out.println("Exception???");
+			getImage(url);		      
+			
+			/*
+			 * System.out.println("[GetImage] Request 2");
+
+		     
+		     
+		     BufferedReader in = new BufferedReader(new InputStreamReader(new GZIPInputStream(url.openStream())));		        
+		     String inputLine;
+		     while ((inputLine = in.readLine()) != null){
+		      	pageLines.add(inputLine);
+		     }		        
+		     in.close();		
+			 */
+			
 		    
 		}
 		for(String line : pageLines){
@@ -407,13 +454,17 @@ public class MangaHereManga {
 				s = s.trim();
 				
 				try {
+					
 					return ImageIO.read(new URL(s));
 				} catch (IOException e) {
 					e.printStackTrace();
 				}				
 			}
 		}	
-		
+		System.out.println("Null: " + pageLines.size());
+		for(String line : pageLines){
+			System.out.println(line);
+		}
 		return null;
 	}
 	
@@ -423,9 +474,12 @@ public class MangaHereManga {
 		ArrayList<String> pageLines = new ArrayList<String>();		
 		
 		try {
-			URL url = new URL(onlineMangaChapters.get(chapter).getBaseURL());			
-			 BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));		        
-		        String inputLine;
+			URL url = new URL(onlineMangaChapters.get(chapter).getBaseURL());
+			System.out.println("[GetChapterImageBaseURLS] Request");
+
+			
+			BufferedReader in = new BufferedReader(new InputStreamReader(url.openStream()));		        
+		    	String inputLine;
 		        while ((inputLine = in.readLine()) != null){
 		        	pageLines.add(inputLine);
 		        }		        

@@ -23,15 +23,39 @@ public class MangaViewerFrame extends JFrame{
 	private MangaFileChooser mangaFileChooser;
 	private MangaMenuBar mangaMenuBar;
 	
-
+	private boolean fullScreen = false;
 	
+	public void setFullscreen(boolean fullScreen){
+		
+		this.fullScreen = fullScreen;
+		
+		if(fullScreen){
+			handler.getMangaViewerFrame().setExtendedState(JFrame.MAXIMIZED_BOTH); 
+			handler.getMangaViewerFrame().dispose();
+			handler.getMangaViewerFrame().setUndecorated(true);
+			handler.getMangaViewerFrame().setVisible(true);
+		}else{
+			handler.getMangaViewerFrame().dispose();
+			handler.getMangaViewerFrame().setUndecorated(false);
+			handler.getMangaViewerFrame().setVisible(true);
+		}
+		
+	}
+	
+	public void toggleFullscreen(){
+		setFullscreen(!fullScreen);
+	}
 	
 	public MangaViewerFrame(MangaViewerHandler handler, int width, int height) {
 		this.handler = handler;
 				
-		this.setSize(width/2, height);
+		//this.setSize(width/2, height);
 
-		this.setLocation(width/2, 0);
+		//this.setLocation(width/2, 0);
+		
+		this.setSize(width, height);
+
+		this.setLocation(0, 0);
 		
 		
 		
@@ -40,7 +64,7 @@ public class MangaViewerFrame extends JFrame{
 		
 
 		//Add panel
-		panel = new MangaViewerPanel(handler);
+		panel = new MangaViewerPanel(handler, this);
 		this.add(panel);
 		
 		
@@ -110,7 +134,9 @@ public class MangaViewerFrame extends JFrame{
 	}
 	
 	public void updateTitle(){
-		this.setTitle(getMangaFrameTitle());
+		String title = getMangaFrameTitle();
+		this.setTitle(title);
+		this.mangaMenuBar.getTitleMenu().setText(title);
 	}
 	
 	public void addKeyListener(){
@@ -130,8 +156,10 @@ public class MangaViewerFrame extends JFrame{
 				 * Down: 40
 				 * Left: 37
 				 * Right: 39
-				 * 
+				 * F11: 122
+				 * Esc: 
 				 */				
+				//System.out.println(event.getKeyCode());
 				
 				switch(event.getKeyCode()){				
 					case 38:
@@ -156,6 +184,11 @@ public class MangaViewerFrame extends JFrame{
 						
 					case 39:
 						handler.nextPage();
+						break;
+						
+					case 122:
+						handler.getMangaViewerFrame().toggleFullscreen();
+						
 						break;
 				
 				}			

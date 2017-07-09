@@ -158,6 +158,8 @@ public class MangaViewerHandler {
 						
 						handler.getMangaViewerFrame().repaint();
 					}
+					
+					
 					if(handler.updateImages && !updating){		
 						updating = true;
 						if(handler.wasUpdateNext){
@@ -175,7 +177,8 @@ public class MangaViewerHandler {
 						}
 						handler.updateImages = false;
 						updating = false;
-					}			
+					}
+								
 					lastTime = System.currentTimeMillis();
 				
 			}
@@ -201,6 +204,8 @@ public class MangaViewerHandler {
 			while(true){
 				
 				if((System.currentTimeMillis() > lastImageTime + MangaHereManga.CONNECTIONDELAY)){
+					
+					
 					if(handler.onlineManga == null) continue;
 					MangaHereManga mangaHereManga = handler.onlineManga;
 					Manga manga  = handler.getCurrentManga();
@@ -439,7 +444,7 @@ public class MangaViewerHandler {
 	public void loadManga(File file){
 		
 		this.currentMangaFile = file;
-
+		
 		if(file.isDirectory()){
 			
 			ArrayList<FileMangaChapter> chapters = new ArrayList<FileMangaChapter>();
