@@ -448,7 +448,9 @@ public class MangaHereManga {
 		    
 		}
 		for(String line : pageLines){
-			if(line.contains("<img src=\"http://h.mhcdn.net/store/manga/")){
+			//<img src=\"http://h.mhcdn.net/store/manga/
+			//<img src=\"http://l.mhcdn.net/store/manga
+			if(line.contains("<img src=\"http://l.mhcdn.net/store/manga")){
 				String s = line.replace("<img src=\"", "");
 				s = s.substring(0, s.indexOf('"'));
 				s = s.trim();
@@ -463,7 +465,7 @@ public class MangaHereManga {
 		}	
 		System.out.println("Null: " + pageLines.size());
 		for(String line : pageLines){
-			System.out.println(line);
+			//System.out.println(line);
 		}
 		return null;
 	}
