@@ -20,7 +20,7 @@ import org.trompgames.mangainfo.MangaStatus;
 
 public class MangaHereManga {
 
-	public static final int CONNECTIONDELAY = 250;
+	public static final int CONNECTIONDELAY = 350;
 	
 	private Manga manga;
 	private String urlString;
@@ -366,7 +366,9 @@ public class MangaHereManga {
 		
 	}
 	
-	
+	public void clearMangaImages(){
+		mangaImages.clear();
+	}
 	
 	public BufferedImage getImage(int chapter, int page){
 		
